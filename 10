@@ -1,0 +1,25 @@
+public void monitorActiveDialog(String tag) {
+    new Handler().postDelayed(() -> {
+        Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
+        if (frag instanceof DialogFragment) {
+            Dialog dialog = ((DialogFragment) frag).getDialog();
+            if (dialog != null) {
+                dialog.setOnDismissListener(d -> {
+                    // بعد از بسته شدن دیالوگ، دوباره کاهش نور شروع شود:
+                    GlobalScreenDimmerManager.getInstance().resetBrightness(); // (اختیاری)
+                    GlobalScreenDimmerManager.getInstance().startDimTimer(5000); // دوباره start شود
+                });
+                GlobalScreenDimmerManager.getInstance().pause();
+            }
+        }
+    }, 100);
+}
+
+// برای دیالوگ معمولی هم همین طور:
+public void monitorActiveDialog(Dialog dialog) {
+    dialog.setOnDismissListener(d -> {
+        GlobalScreenDimmerManager.getInstance().resetBrightness();
+        GlobalScreenDimmerManager.getInstance().startDimTimer(5000);
+    });
+    GlobalScreenDimmerManager.getInstance().pause();
+}
