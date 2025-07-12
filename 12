@@ -1,0 +1,23 @@
+public void monitorActiveDialog(final String tag) {
+    new Handler().postDelayed(() -> {
+        Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
+        if (frag instanceof DialogFragment) {
+            // هنگام باز شدن دیالوگ
+            GlobalScreenDimmerManager.getInstance().pause();
+
+            // Lifecycle callback برای بسته شدن قطعی دیالوگ
+            getSupportFragmentManager().registerFragmentLifecycleCallbacks(
+                new FragmentManager.FragmentLifecycleCallbacks() {
+                    @Override
+                    public void onFragmentViewDestroyed(FragmentManager fm, Fragment f) {
+                        if (f instanceof DialogFragment && tag.equals(f.getTag())) {
+                            GlobalScreenDimmerManager.getInstance().resetBrightness();
+                            GlobalScreenDimmerManager.getInstance().startDimTimer(5000);
+                            fm.unregisterFragmentLifecycleCallbacks(this);
+                        }
+                    }
+                }, false
+            );
+        }
+    }, 100);
+}
