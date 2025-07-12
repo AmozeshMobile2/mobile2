@@ -1,0 +1,14 @@
+datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
+
+getSupportFragmentManager().registerFragmentLifecycleCallbacks(
+    new FragmentManager.FragmentLifecycleCallbacks() {
+        @Override
+        public void onFragmentViewDestroyed(FragmentManager fm, Fragment f) {
+            if (f instanceof DialogFragment && "DATE_PICKER".equals(f.getTag())) {
+                GlobalScreenDimmerManager.getInstance().resetBrightness();
+                GlobalScreenDimmerManager.getInstance().startDimTimer(5000);
+                fm.unregisterFragmentLifecycleCallbacks(this);
+            }
+        }
+    }, false
+);
