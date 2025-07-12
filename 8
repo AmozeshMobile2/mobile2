@@ -1,0 +1,102 @@
+package ir.sadadpsp.merchant.util.powersaver;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.os.Handler;
+import android.view.WindowManager;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class GlobalScreenDimmerManager {
+
+    private static GlobalScreenDimmerManager instance;
+    private Handler handler = new Handler();
+    private Runnable dimRunnable;
+    private boolean paused = false;
+    private Activity currentActivity;
+    private int currentStep = 0;
+
+    // مقادیر تدریجی نور (هر کدام ۵ ثانیه)
+    private final List<Float> brightnessSteps = Arrays.asList(
+            0.4f, 0.2f, 0.1f, 0.05f, 0.01f
+    );
+
+    private GlobalScreenDimmerManager() {}
+
+    public static GlobalScreenDimmerManager getInstance() {
+        if (instance == null) {
+            instance = new GlobalScreenDimmerManager();
+        }
+        return instance;
+    }
+
+    public void setCurrentActivity(Activity activity) {
+        this.currentActivity = activity;
+    }
+
+    // شروع کاهش نور تدریجی پس از تاخیر (مثلاً ۵ ثانیه)
+    public void startDimTimer(long delayMillis) {
+        if (paused || currentActivity == null) return;
+        cancelDimTimer();
+        resetBrightness();
+        currentStep = 0;
+        dimRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (currentStep < brightnessSteps.size()) {
+                    setBrightness(brightnessSteps.get(currentStep));
+                    currentStep++;
+                    handler.postDelayed(this, 5000); // هر ۵ ثانیه یک مرحله
+                }
+            }
+        };
+        handler.postDelayed(dimRunnable, delayMillis); // شروع پس از delay (مثلاً ۵ ثانیه)
+    }
+
+    // توقف یا لغو کاهش نور
+    public void cancelDimTimer() {
+        handler.removeCallbacksAndMessages(null);
+        currentStep = 0;
+        resetBrightness();
+    }
+
+    public void pause() {
+        paused = true;
+        cancelDimTimer();
+    }
+
+    public void resume() {
+        if (!paused) return;
+        paused = false;
+        startDimTimer(5000); // پس از ۵ ثانیه دوباره تدریجی کم کن
+    }
+
+    public void setBrightness(float level) {
+        if (currentActivity != null) {
+            WindowManager.LayoutParams params = currentActivity.getWindow().getAttributes();
+            params.screenBrightness = level;
+            currentActivity.getWindow().setAttributes(params);
+        }
+    }
+
+    public void resetBrightness() {
+        if (currentActivity != null) {
+            WindowManager.LayoutParams params = currentActivity.getWindow().getAttributes();
+            params.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+            currentActivity.getWindow().setAttributes(params);
+        }
+    }
+
+    // دیالوگ را مانیتور کن (هنگام باز شدن متوقف شود، پس از بسته شدن مجدد اجرا شود)
+    public void monitorDialog(final Dialog dialog) {
+        pause();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface d) {
+                resume();
+            }
+        });
+    }
+}
