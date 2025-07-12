@@ -1,0 +1,21 @@
+import androidx.fragment.app.DialogFragment;
+
+// ...
+
+new Handler().postDelayed(() -> {
+    Fragment dialogFragment = getSupportFragmentManager().findFragmentByTag("DATE_PICKER");
+    if (dialogFragment instanceof DialogFragment) {
+        Dialog dialog = ((DialogFragment) dialogFragment).getDialog();
+        if (dialog != null && dialog.getWindow() != null) {
+            Window dialogWindow = dialog.getWindow();
+            dialogWindow.getDecorView().setOnTouchListener((v, event) -> {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    WindowManager.LayoutParams params = dialogWindow.getAttributes();
+                    params.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+                    dialogWindow.setAttributes(params);
+                }
+                return false;
+            });
+        }
+    }
+}, 100);
