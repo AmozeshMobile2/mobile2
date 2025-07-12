@@ -1,0 +1,38 @@
+import android.app.Dialog;
+import android.os.Handler;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+
+public abstract class BaseActivity<T> extends AppCompatActivity {
+    // ... onResume, onPause و سایر متدها
+
+    /**
+     * مانیتور کردن دیالوگ‌هایی که با DialogFragment و tag ساخته می‌شوند (مثلاً PrimeDatePicker)
+     */
+    public void monitorActiveDialog(String tag) {
+        new Handler().postDelayed(() -> {
+            Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
+            if (frag instanceof DialogFragment) {
+                Dialog dialog = ((DialogFragment) frag).getDialog();
+                if (dialog != null) {
+                    dialog.setOnDismissListener(d -> {
+                        GlobalScreenDimmerManager.getInstance().resetBrightness();
+                        GlobalScreenDimmerManager.getInstance().startDimTimer(5000);
+                    });
+                    GlobalScreenDimmerManager.getInstance().pause();
+                }
+            }
+        }, 100);
+    }
+
+    /**
+     * مانیتور کردن دیالوگ معمولی (AlertDialog و ...)
+     */
+    public void monitorActiveDialog(Dialog dialog) {
+        dialog.setOnDismissListener(d -> {
+            GlobalScreenDimmerManager.getInstance().resetBrightness();
+            GlobalScreenDimmerManager.getInstance().startDimTimer(5000);
+        });
+        GlobalScreenDimmerManager.getInstance().pause();
+    }
+}
