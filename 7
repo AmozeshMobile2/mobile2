@@ -1,0 +1,13 @@
+// متد کمکی برای مانیتورینگ دیالوگ‌ها
+private void monitorDialog(final Dialog dialog) {
+    // توقف کاهش نور وقتی دیالوگ باز می‌شود
+    if (screenDimmer != null) screenDimmer.pause();
+
+    // وقتی دیالوگ بسته شد دوباره آغاز شود
+    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            if (screenDimmer != null) screenDimmer.resume();
+        }
+    });
+}
