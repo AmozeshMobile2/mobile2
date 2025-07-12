@@ -1,0 +1,116 @@
+حتماً آقای A،
+در ادامه کد کامل متد showDatePicker() شما
+(با reset شدن نور صفحه موقع لمس روی PrimeDatePicker به‌صورت درست و تمیز روی Window خود دیالوگ)
+آورده شده است.
+
+
+---
+
+🚩 کد کامل showDatePicker با reset نور صفحه هنگام لمس دیالوگ
+
+private void showDatePicker() {
+    PrimeCalendar today = new PersianCalendar();
+    Calendar calendar = Calendar.getInstance();
+    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+    int minute = calendar.get(Calendar.MINUTE);
+
+    TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int selectHour, int selectMinute) {
+            String time= selectHour + ":" + String.format("%02d",selectMinute);
+            Toast.makeText(ReportActivity.this, "time is "+ time, Toast.LENGTH_SHORT).show();
+        }
+    },
+            hour,
+            minute,
+            true
+    );
+
+    RangeDaysPickCallback callback = new RangeDaysPickCallback() {
+        @Override
+        public void onRangeDaysPicked(PrimeCalendar startDay, PrimeCalendar endDay) {
+            if (startDay != null && endDay != null) {
+                GregorianCalendar startGregorian = new GregorianCalendar();
+                startGregorian.setTime(startDay.getTime());
+                int startYear = startGregorian.get(Calendar.YEAR);
+                int startMonth = startGregorian.get(Calendar.MONTH) + 1;
+                int startDayOfMonth = startGregorian.get(Calendar.DAY_OF_MONTH);
+
+                GregorianCalendar endGregorian = new GregorianCalendar();
+                endGregorian.setTime(endDay.getTime());
+                int endYear = endGregorian.get(Calendar.YEAR);
+                int endMonth = endGregorian.get(Calendar.MONTH) + 1;
+                int endDayOfMonth = endGregorian.get(Calendar.DAY_OF_MONTH);
+
+                String miladiStart = String.format("%04d/%02d/%02d 00:00:00", startYear, startMonth, startDayOfMonth);
+                String miladiEnd = String.format("%04d/%02d/%02d 23:59:59", endYear, endMonth, endDayOfMonth);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
+                try {
+                    Date dateStart = sdf.parse(miladiStart);
+                    Date dateEnd = sdf.parse(miladiEnd);
+
+                    long startDateMillis = dateStart.getTime();
+                    long endDateMillis = dateEnd.getTime();
+
+                    getViewModel().filterByDate(type, startDateMillis, endDateMillis);
+
+                    startDateShort = startDay.getShortDateString();
+                    endDateShort = endDay.getShortDateString();
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // ✔️ حتی اگر خواستی، نور اینجا هم reset بشه (هنگام انتخاب تاریخ)
+            if (getWindow() != null) {
+                WindowManager.LayoutParams params = getWindow().getAttributes();
+                params.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+                getWindow().setAttributes(params);
+            }
+        }
+    };
+
+    PrimeDatePicker datePicker = PrimeDatePicker.Companion.dialogWith(today)
+            .pickRangeDays(callback)
+            .applyTheme(new DatePickerActivity().getDefaultTheme(this))
+            .maxPossibleDate(today)
+            .build();
+
+    datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
+    timePickerDialog.show();
+
+    // --------- کد reset نور صفحه روی window دیالوگ پریم ---------
+    new Handler().postDelayed(() -> {
+        Fragment dialogFragment = getSupportFragmentManager().findFragmentByTag("DATE_PICKER");
+        if (dialogFragment != null && dialogFragment.getDialog() != null && dialogFragment.getDialog().getWindow() != null) {
+            Window dialogWindow = dialogFragment.getDialog().getWindow();
+            dialogWindow.getDecorView().setOnTouchListener((v, event) -> {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    WindowManager.LayoutParams params = dialogWindow.getAttributes();
+                    params.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+                    dialogWindow.setAttributes(params);
+                }
+                return false;
+            });
+        }
+    }, 100); // تاخیر برای اطمینان از attach شدن ویو
+}
+
+
+---
+
+نکته:
+
+این کد فقط نور window دیالوگ PrimeDatePicker را reset می‌کند و روی کل پروژه اثری ندارد.
+
+اگر تایمر یا کاهش مرحله‌ای نور هم داشتی، می‌توانی همانجا صدا بزنی.
+
+
+
+---
+
+اگر همین کد رو گذاشتی و باز هم جواب نگرفت (یا دیالوگ خاص دیگه‌ای داشتی)، فقط اسم و کدش رو بگو تا راه‌حل اختصاصی‌تر بنویسم.
+در خدمتتم همیشه آقای A! 🚀
+
