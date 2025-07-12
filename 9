@@ -1,0 +1,10 @@
+datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
+new Handler().postDelayed(() -> {
+    Fragment frag = getSupportFragmentManager().findFragmentByTag("DATE_PICKER");
+    if (frag instanceof androidx.fragment.app.DialogFragment) {
+        Dialog dialog = ((androidx.fragment.app.DialogFragment) frag).getDialog();
+        if (dialog != null) {
+            GlobalScreenDimmerManager.getInstance().monitorDialog(dialog);
+        }
+    }
+}, 100);
