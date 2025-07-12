@@ -1,1 +1,19 @@
-6
+datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
+
+new Handler().postDelayed(() -> {
+    Fragment dialogFragment = getSupportFragmentManager().findFragmentByTag("DATE_PICKER");
+    if (dialogFragment != null && dialogFragment.getView() != null) {
+        View root = dialogFragment.getView();
+
+        // اگر root خودش ViewGroup بود، میشه روی هر child خاص هم listener گذاشت
+        root.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                // نور صفحه اکتیویتی را زیاد کن (fallback مطمئن)
+                WindowManager.LayoutParams params = getWindow().getAttributes();
+                params.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE;
+                getWindow().setAttributes(params);
+            }
+            return false;
+        });
+    }
+}, 100); // تاخیر برای attach شدن ویو کافی است
