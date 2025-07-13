@@ -1,0 +1,88 @@
+حتماً آقای A، اینم لیست کامل و جامع URLهایی که برای یک اندروید دولوپر لازمه — شامل منابع رسمی، ریپازیتوری‌ها، ابزارها، کتابخانه‌ها و سرویس‌های ضروری:
+
+
+---
+
+🧭 منابع رسمی توسعه اندروید:
+
+عنوان	لینک
+
+Android Developer Portal (مستندات رسمی)	https://developer.android.com
+Android Studio (دانلود ابزار رسمی توسعه)	https://developer.android.com/studio
+Google Play Console (مدیریت اپ‌ها)	https://play.google.com/console
+Firebase Console	https://console.firebase.google.com
+Google Cloud Console	https://console.cloud.google.com
+Material Design Guidelines	https://m3.material.io
+
+
+
+---
+
+📦 ریپازیتوری‌های Maven:
+
+عنوان	لینک	استفاده در Gradle
+
+Google Maven Repository	https://maven.google.com	google()
+Maven Central	https://search.maven.org	mavenCentral()
+JitPack	https://jitpack.io	maven { url 'https://jitpack.io' }
+
+
+
+---
+
+⚙️ ابزارها و وابستگی‌ها:
+
+عنوان	لینک
+
+Gradle Plugin Portal	https://plugins.gradle.org
+SDK Manager (داخل Android Studio)	https://developer.android.com/studio/command-line/sdkmanager
+Emulator Skins & System Images	https://developer.android.com/studio/run/emulator
+
+
+
+---
+
+🔧 کتابخانه‌ها و فریم‌ورک‌های اصلی:
+
+عنوان	لینک
+
+Android Jetpack Libraries	https://developer.android.com/jetpack
+Jetpack Compose	https://developer.android.com/jetpack/compose
+Kotlin Language	https://kotlinlang.org
+Retrofit	https://square.github.io/retrofit/
+OkHttp	https://square.github.io/okhttp/
+Hilt (Dependency Injection)	https://dagger.dev/hilt/
+Room (Database)	https://developer.android.com/jetpack/androidx/releases/room
+Coil (Image Loading)	https://coil-kt.github.io/coil/
+
+
+
+---
+
+📊 آنالیتیکس، کرش ریپورتینگ، اعلان‌ها:
+
+عنوان	لینک
+
+Firebase Crashlytics	https://firebase.google.com/products/crashlytics
+Firebase Analytics	https://firebase.google.com/products/analytics
+Firebase Cloud Messaging (FCM)	https://firebase.google.com/products/cloud-messaging
+
+
+
+---
+
+🧪 تست، CI/CD و دیپلوی:
+
+عنوان	لینک
+
+Firebase Test Lab	https://firebase.google.com/products/test-lab
+GitHub Actions	https://github.com/features/actions
+Bitrise (CI برای اپ موبایل)	https://www.bitrise.io
+App Distribution (Firebase)	https://firebase.google.com/products/app-distribution
+
+
+
+---
+
+❓اگر نیاز به لیست کتابخانه‌های پیشنهادی با لینک Gradle هم داری (با ورژن)، خوشحال میشم برات آماده کنم. فقط بگو چه کتابخونه‌هایی مد نظرت هستن؟
+
