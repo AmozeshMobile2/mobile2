@@ -1,0 +1,148 @@
+// Android SSH Proxy App (Kotlin + Jetpack Compose)
+// Corrected: setPortForwardingD is not detected in newer JSch versions. Use session.setPortForwardingL for local forwarding.
+// Note: For full SOCKS5 proxy on Android, use third-party libraries or JNI wrappers, as JSch is limited.
+// This sample will show local port forwarding (L) as dynamic forwarding (D) is not always present in mobile JSch builds.
+
+// build.gradle dependencies (add these in your build.gradle):
+/*
+dependencies {
+    implementation 'androidx.compose.ui:ui:1.6.1'
+    implementation 'androidx.activity:activity-compose:1.9.0'
+    implementation 'com.jcraft:jsch:0.1.55' // for SSH (JSch)
+    // ... other dependencies
+}
+*/
+
+// MainActivity.kt
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import com.jcraft.jsch.JSch
+import com.jcraft.jsch.Session
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            SSHProxyApp()
+        }
+    }
+}
+
+@Composable
+fun SSHProxyApp() {
+    var host by remember { mutableStateOf("") }
+    var port by remember { mutableStateOf("22") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var localPort by remember { mutableStateOf("1080") }
+    var remoteHost by remember { mutableStateOf("127.0.0.1") }
+    var remotePort by remember { mutableStateOf("80") }
+    var status by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        OutlinedTextField(
+            value = host,
+            onValueChange = { host = it },
+            label = { Text("SSH Host") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = port,
+            onValueChange = { port = it },
+            label = { Text("SSH Port") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = localPort,
+            onValueChange = { localPort = it },
+            label = { Text("Local Port (forward from)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = remoteHost,
+            onValueChange = { remoteHost = it },
+            label = { Text("Remote Host (forward to)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = remotePort,
+            onValueChange = { remotePort = it },
+            label = { Text("Remote Port (forward to)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                scope.launch(Dispatchers.IO) {
+                    status = connectSSHAndPortForward(host, port, username, password, localPort, remoteHost, remotePort)
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Connect & Start Port Forward")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(status)
+    }
+}
+
+fun connectSSHAndPortForward(
+    host: String,
+    port: String,
+    user: String,
+    pass: String,
+    localPort: String,
+    remoteHost: String,
+    remotePort: String
+): String {
+    return try {
+        val jsch = JSch()
+        val session: Session = jsch.getSession(user, host, port.toInt())
+        session.setPassword(pass)
+        session.setConfig("StrictHostKeyChecking", "no")
+        session.connect(30000) // 30 seconds timeout
+        // Local port forwarding: localPort -> remoteHost:remotePort
+        session.setPortForwardingL(localPort.toInt(), remoteHost, remotePort.toInt())
+        "SSH Connected. Local Port Forwarding active: 127.0.0.1:$localPort -> $remoteHost:$remotePort"
+    } catch (e: Exception) {
+        "Connection failed: ${e.message}"
+    }
+}
+
+// Note: setPortForwardingD (SOCKS) is not always in Android JSch builds. setPortForwardingL provides local port forwarding.
+// For real SOCKS5/SSH proxy on Android, try libraries like sshj, or use JNI wrappers for OpenSSH. This code demonstrates secure SSH port forwarding.
+// For production, consider permissions, background service, connection checks, security, key-based auth, etc.
