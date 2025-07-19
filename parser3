@@ -1,0 +1,16 @@
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+
+public class MenuItemModel {
+    @JacksonXmlProperty(isAttribute = true, localName = "id")
+    public String id;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "fn")
+    public String fn;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "enable")
+    public boolean enable;
+
+    @JacksonXmlProperty(localName = "ServiceDescriptor")
+    public ServiceDescriptor descriptor;
+}
