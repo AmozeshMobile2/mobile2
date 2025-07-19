@@ -1,0 +1,116 @@
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.List;
+
+@JacksonXmlRootElement(localName = "DynamicMenus")
+public class DynamicMenus {
+
+    @JacksonXmlProperty(localName = "MenuGroup")
+    @JacksonXmlElementWrapper(useWrapping = false)
+    public List<MenuGroup> menuGroups;
+}
+
+++++++++++++++++++
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
+public class MenuGroup {
+
+    @JacksonXmlProperty(isAttribute = true, localName = "class")
+    public String clazz;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "enable")
+    public boolean enable;
+
+    @JacksonXmlProperty(localName = "TopLevelMenu")
+    public TopLevelMenu topLevelMenu;
+}
+++++++++++++++++++
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
+import java.util.List;
+
+public class TopLevelMenu {
+
+    @JacksonXmlProperty(isAttribute = true, localName = "enable")
+    public boolean enable;
+
+    @JacksonXmlProperty(localName = "MenuItem")
+    @JacksonXmlElementWrapper(useWrapping = false)
+    public List<MenuItemModel> items;
+}
+
+++++++++++
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+@JacksonXmlRootElement(localName = "MenuItem")
+public class MenuItemModel {
+
+    @JacksonXmlProperty(isAttribute = true, localName = "id")
+    public String id;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "fn")
+    public String fn;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "enable")
+    public boolean enable;
+
+    @JacksonXmlProperty(localName = "ServiceDescriptor")
+    public ServiceDescriptor descriptor;
+}
+
+
+
++++++++++++
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
+public class ServiceDescriptor {
+
+    @JacksonXmlProperty(isAttribute = true, localName = "service")
+    public String service;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "id")
+    public String id;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "serviceAmount")
+    public int serviceAmount;
+}
+
++++++++++++++++
+
+import android.content.Context;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ParseXml {
+
+    public static List<MenuItemModel> parseXml(Context context) {
+        List<MenuItemModel> list = new ArrayList<>();
+
+        try {
+            InputStream inputStream = context.getAssets().open("ServiceConfig.xml");
+            XmlMapper xmlMapper = new XmlMapper();
+            DynamicMenus root = xmlMapper.readValue(inputStream, DynamicMenus.class);
+
+            for (MenuGroup group : root.menuGroups) {
+                if (group.topLevelMenu != null && group.topLevelMenu.items != null) {
+                    for (MenuItemModel item : group.topLevelMenu.items) {
+                        if (item.enable && item.descriptor != null) {
+                            list.add(item);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+}
+
+
