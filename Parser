@@ -1,0 +1,14 @@
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
+public class ServiceDescriptor {
+    @JacksonXmlProperty(isAttribute = true, localName = "service")
+    public String service;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "id")
+    public String id;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "serviceAmount")
+    public int serviceAmount;
+}
+
+
