@@ -1,0 +1,41 @@
+import android.content.Context;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ParseXml {
+
+    public static List<MenuItemModel> parseXml(Context context) {
+        List<MenuItemModel> itemsList = new ArrayList<>();
+
+        try {
+            InputStream inputStream = context.getAssets().open("ServiceConfig.xml");
+
+            XmlMapper xmlMapper = new XmlMapper();
+            xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            
+            DynamicMenus root = xmlMapper.readValue(inputStream, DynamicMenus.class);
+
+            for (MenuGroup group : root.menuGroups) {
+                if (group.topLevelMenus != null) {
+                    for (TopLevelMenu menu : group.topLevelMenus) {
+                        if (menu.items != null) {
+                            for (MenuItemModel item : menu.items) {
+                                if (item.enable && item.descriptor != null) {
+                                    itemsList.add(item);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return itemsList;
+    }
+}
