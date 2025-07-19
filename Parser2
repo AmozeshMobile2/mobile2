@@ -1,0 +1,178 @@
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+
+public class MenuItemModel {
+    @JacksonXmlProperty(isAttribute = true, localName = "id")
+    public String id;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "fn")
+    public String fn;
+
+    @JacksonXmlProperty(isAttribute = true, localName = "enable")
+    public boolean enable;
+
+    @JacksonXmlProperty(localName = "ServiceDescriptor")
+    public ServiceDescriptor descriptor;
+}
+
+
+_-------------
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+
+import java.util.List;
+
+public class TopLevelMenu {
+    @JacksonXmlElementWrapper(useWrapping = false)
+    @JacksonXmlProperty(localName = "MenuItem")
+    public List<MenuItemModel> items;
+}
+
+
+
+------------
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+public List<MenuItemModel> parseXml(Context context) {
+    List<MenuItemModel> list = new ArrayList<>();
+
+    try {
+        InputStream inputStream = context.getAssets().open("ServiceConfig.xml");
+
+        XmlMapper xmlMapper = new XmlMapper();
+
+        // اگر ساختار اصلی XML درون <TopLevelMenu> باشه
+        TopLevelMenu root = xmlMapper.readValue(inputStream, TopLevelMenu.class);
+
+        for (MenuItemModel item : root.items) {
+            if (item.enable && item.descriptor != null) {
+                list.add(item);
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+} import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+public List<MenuItemModel> parseXml(Context context) {
+    List<MenuItemModel> list = new ArrayList<>();
+
+    try {
+        InputStream inputStream = context.getAssets().open("ServiceConfig.xml");
+
+        XmlMapper xmlMapper = new XmlMapper();
+
+        // اگر ساختار اصلی XML درون <TopLevelMenu> باشه
+        TopLevelMenu root = xmlMapper.readValue(inputStream, TopLevelMenu.class);
+
+        for (MenuItemModel item : root.items) {
+            if (item.enable && item.descriptor != null) {
+                list.add(item);
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
+
+
+------------
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/text_fn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="عنوان سرویس"
+        android:textStyle="bold"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/text_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="مبلغ"
+        android:layout_marginTop="4dp"/>
+</LinearLayout>
+
+
+-_---------_-----
+public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.ViewHolder> {
+
+    private List<MenuItemModel> itemList;
+
+    public MenuAdapter(List<MenuItemModel> itemList) {
+        this.itemList = itemList;
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView fnTextView, amountTextView;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            fnTextView = itemView.findViewById(R.id.text_fn);
+            amountTextView = itemView.findViewById(R.id.text_amount);
+        }
+    }
+
+    @Override
+    public MenuAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_menu, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(MenuAdapter.ViewHolder holder, int position) {
+        MenuItemModel item = itemList.get(position);
+        holder.fnTextView.setText(item.fn);
+        holder.amountTextView.setText(item.descriptor.serviceAmount + " ریال");
+    }
+
+    @Override
+    public int getItemCount() {
+        return itemList.size();
+    }
+}
+
+
+____________
+
+public class MainActivity extends AppCompatActivity {
+
+    RecyclerView recyclerView;
+    MenuAdapter adapter;
+    List<MenuItemModel> itemList;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main); // باید یک RecyclerView داخل این لایه باشه
+
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        itemList = parseXml(this); // تابعی که بالاتر ساختیم
+        adapter = new MenuAdapter(itemList);
+        recyclerView.setAdapter(adapter);
+    }
+}
+
+
+
+
+
+
+
+
