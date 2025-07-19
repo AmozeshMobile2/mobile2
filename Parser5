@@ -1,0 +1,26 @@
+import android.os.Bundle;
+import android.util.Log;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity"; // for logging
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main); // or your actual layout
+
+        // 🔽 Call your parser
+        List<MenuItemModel> items = ParseXml.parseXml(this);
+
+        // 🔽 Example: log the results
+        for (MenuItemModel item : items) {
+            Log.d(TAG, "Item ID: " + item.id + ", fn: " + item.fn + ", service: " +
+                    (item.descriptor != null ? item.descriptor.service : "null"));
+        }
+
+        // ✅ Now you can use 'items' to populate a RecyclerView or UI
+    }
+}
